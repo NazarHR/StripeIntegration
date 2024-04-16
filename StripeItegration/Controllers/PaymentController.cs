@@ -17,8 +17,8 @@ namespace StripeItegration.Controllers
         [HttpPost]
         public IActionResult Create(string prodict_id)
         {
-            var domain = "https://localhost:7035";
-            
+            string domain = string.Format("{0}://{1}",
+                       HttpContext.Request.Scheme, HttpContext.Request.Host);
 
             var priceOptions = new PriceListOptions
             {
