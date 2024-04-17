@@ -87,9 +87,8 @@ namespace StripeItegration.Controllers
             return token;
         }
         [HttpPost("/register", Name = "Register")]
-        public async Task<IdentityResult> Register([FromBody] RegisterModel registerModel)
+        public async Task<IActionResult> Register([FromBody] RegisterModel registerModel)
         {
-
             if (_userManager.FindByNameAsync(registerModel.Username).Result == null)
             {
                 var user = new ApplicationUser();
@@ -97,13 +96,17 @@ namespace StripeItegration.Controllers
                 user.Email = registerModel.Email;
 
                 var result = await _userManager.CreateAsync(user, registerModel.Password);
-                return result;
+                if(result.Succeeded)
+                {
+                    return Ok();
+                }
+                return BadRequest(result.Errors);
             }
-            return IdentityResult.Failed(
+            return BadRequest( IdentityResult.Failed(
                 new IdentityError
-            {
-                Description = "User Already Exist"
-            });
+                {
+                    Description = "User Already Exist"
+                }));
         }
     }
 }

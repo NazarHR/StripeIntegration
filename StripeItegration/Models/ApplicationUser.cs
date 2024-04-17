@@ -5,7 +5,7 @@ namespace StripeItegration.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        public string SubscriptionLevel { get; set; } = "none";
-        public string Role { get; set; } = "DefaultUser";
+        public string? SubscriptionLevel { get; set; }
+        public string? StripeUserId { get; set; }
     }
 }

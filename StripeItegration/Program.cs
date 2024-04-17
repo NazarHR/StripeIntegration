@@ -20,9 +20,10 @@ namespace StripeItegration
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("EventSchedulerApp"));
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("StringIntegrationApp"));
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+            .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
             // Add services to the container.
@@ -58,7 +59,7 @@ namespace StripeItegration
                 });
             });
 
-            StripeConfiguration.ApiKey = "sk_test_51P4QUoGkl2o80QOPWtwGayTGb83KACe0c2c9qoZR2wZVp7bZY3VnSynUbaRjxMMl4VO4162Eyci9wQgWRaH6PyJr00TTOLLtM2";
+            StripeConfiguration.ApiKey = configuration["Stripe:Key"];
 
             // Adding Authentication
             builder.Services.AddAuthentication(options =>
@@ -98,7 +99,7 @@ namespace StripeItegration
 
             app.UseAuthorization();
 
-            app.SeedUsers();
+            app.SetupRole();
             app.MapControllers();
 
             app.Run();

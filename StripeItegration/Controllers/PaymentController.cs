@@ -3,6 +3,7 @@ using Stripe.Checkout;
 using Stripe;
 using System.Web;
 using static System.Net.WebRequestMethods;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StripeItegration.Controllers
 {
@@ -15,6 +16,7 @@ namespace StripeItegration.Controllers
         //4000 0027 6000 3184 - authentication needed
         //4000 0000 0000 0002 - failed
         [HttpPost]
+        [Authorize]
         public IActionResult Create(string prodict_id)
         {
             string domain = string.Format("{0}://{1}",
@@ -37,6 +39,7 @@ namespace StripeItegration.Controllers
                     Quantity = 1,
                   },
                 },
+                //Metadata = new Dictionary<string, string> { { "User"} },
                 Mode = "subscription",
                 SuccessUrl = domain + "/success?session_id={CHECKOUT_SESSION_ID}",
                 CancelUrl = Url.Link("Cancel",new { }),
