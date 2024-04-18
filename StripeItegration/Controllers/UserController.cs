@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using StripeItegration.DbContext;
+using StripeItegration.Entities;
 using StripeItegration.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -42,7 +44,7 @@ namespace StripeItegration.Controllers
         /// </remarks>
         /// <response code="200">Authentication Token and Expiration Time</response>
         /// <response code="401">If crednetials are wrong</response>  
-        [HttpPost("/token")]
+        [HttpPost("/auth")]
         public async Task<IActionResult> Token([FromBody] LoginModel model)
         {
             var user = await _userManager.FindByNameAsync(model.Username);

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Stripe;
 
-namespace StripeItegration.Models
+namespace StripeItegration.Entities
 {
     public class ApplicationUser : IdentityUser
     {

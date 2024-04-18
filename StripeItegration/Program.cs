@@ -7,7 +7,7 @@ using Microsoft.OpenApi.Models;
 using Stripe;
 using StripeItegration.Config;
 using StripeItegration.DbContext;
-using StripeItegration.Models;
+using StripeItegration.Entities;
 using System.Reflection;
 using System.Text;
 
@@ -23,13 +23,11 @@ namespace StripeItegration
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("StringIntegrationApp"));
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
-            // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddSwaggerGen(options =>
@@ -41,7 +39,7 @@ namespace StripeItegration
                     Name = "Authorization",
                     Type = SecuritySchemeType.Http,
                     BearerFormat = "JWT",
-                    Scheme = "Bearer"
+                    Scheme = "Bearer",
                 });
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
@@ -78,8 +76,8 @@ namespace StripeItegration
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    //ValidAudience = configuration["JWT:ValidAudience"],
-                    //ValidIssuer = configuration["JWT:ValidIssuer"],
+                    ValidAudience = configuration["JWT:ValidAudience"],
+                    ValidIssuer = configuration["JWT:ValidIssuer"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
                 };
             });

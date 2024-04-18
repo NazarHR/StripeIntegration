@@ -4,19 +4,28 @@ using Stripe;
 using System.Web;
 using static System.Net.WebRequestMethods;
 using Microsoft.AspNetCore.Authorization;
+using StripeItegration.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace StripeItegration.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class PaymentController : Controller
     {
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public PaymentController(UserManager<ApplicationUser> userManager)
+        {
+            _userManager = userManager;
+        }
+
         //test credit cards
         //4242 4242 4242 4242 - success
         //4000 0027 6000 3184 - authentication needed
         //4000 0000 0000 0002 - failed
         [HttpPost]
-        [Authorize]
         public IActionResult Create(string prodict_id)
         {
             string domain = string.Format("{0}://{1}",
@@ -39,27 +48,35 @@ namespace StripeItegration.Controllers
                     Quantity = 1,
                   },
                 },
-                //Metadata = new Dictionary<string, string> { { "User"} },
+                ClientReferenceId = HttpContext.User.Identity.Name,
                 Mode = "subscription",
                 SuccessUrl = domain + "/success?session_id={CHECKOUT_SESSION_ID}",
                 CancelUrl = Url.Link("Cancel",new { }),
             };
             var service = new SessionService();
             Session session = service.Create(options);
+            Console.WriteLine(session.ReturnUrl);
             return Ok(session.Url);
         }
-
+        [AllowAnonymous]
         [HttpGet("/success", Name = "Success")]
-        public ActionResult OrderSuccess([FromQuery]string session_id)
+        public async Task<IActionResult> OrderSuccess([FromQuery]string session_id)
         {
             var sessionService = new SessionService();
             Session session = sessionService.Get(session_id);
-
+            var user = await _userManager.FindByNameAsync(session.ClientReferenceId);
+            var products = await sessionService.ListLineItemsAsync(session.Id);
+            var product = products.First();
+            var subscriptinoPlan = product.Description.Split(" ")[0];
             var customerService = new CustomerService();
-            Customer customer = customerService.Get(session.CustomerId);
+            var stripeCustomer = customerService.Get(session.Id);
+            user.SubscriptionLevel = subscriptinoPlan;
+            await _userManager.UpdateAsync(user);
+            
+            return Created(session.Id, stripeCustomer);
 
-            return Created(session_id, customer);
         }
+        [AllowAnonymous]
         [HttpGet("/cancel", Name = "Cancel")]
         public IActionResult Cancel()
         {
@@ -88,7 +105,7 @@ namespace StripeItegration.Controllers
         public IActionResult CancelSubscription(string subscription_item_id)
         {
             var service = new SubscriptionService();
-            service.Cancel("subscription_item_id");
+            service.Cancel(subscription_item_id);
             return Ok("Subscription cancelled");
         }
     }

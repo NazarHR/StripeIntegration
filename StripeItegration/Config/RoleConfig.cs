@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using StripeItegration.DbContext;
-using StripeItegration.Models;
+using StripeItegration.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StripeItegration.Config
@@ -29,7 +29,7 @@ namespace StripeItegration.Config
                         var adminUser = new ApplicationUser();
                         adminUser.UserName = "Admin";
                         adminUser.Email = "Admin@ADmin.com";
-                        await userManager.CreateAsync(adminUser, "Admin1");
+                        await userManager.CreateAsync(adminUser, "Admin#1");
                         await userManager.AddToRoleAsync(adminUser, "Admin");
                     }
                 }

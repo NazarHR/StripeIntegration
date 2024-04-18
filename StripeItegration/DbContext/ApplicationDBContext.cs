@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using StripeItegration.Models;
+using StripeItegration.Entities;
 
 namespace StripeItegration.DbContext
 {
