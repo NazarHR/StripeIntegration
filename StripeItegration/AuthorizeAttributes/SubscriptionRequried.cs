@@ -1,19 +1,32 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using StripeItegration.Entities;
+using System.Security.Claims;
 using System.Web.Mvc.Filters;
 
 namespace StripeItegration.AuthorizeAttributes
 {
-    public class SubscriptionRequriedAttribute : ActionFilterAttribute, IAuthenticationFilter
+    
+    public class SubscriptionRequriedAttribute : Attribute, IAuthorizationFilter
     {
-        public void OnAuthentication(AuthenticationContext filterContext)
-        {
-            throw new NotImplementedException();
-        }
+        public string? Level { get; set; } = "Base";
 
-        public void OnAuthenticationChallenge(AuthenticationChallengeContext filterContext)
+        public void OnAuthorization(AuthorizationFilterContext context)
         {
-            throw new NotImplementedException();
+            var user = context.HttpContext.User;
+            if (user == null || !user.Identity.IsAuthenticated)
+            {
+                context.Result = new UnauthorizedResult();
+                return;
+            }
+            var identity = (ClaimsIdentity)user.Identity;
+            var currentLevel = identity.FindFirst("SubscriptionLevel").Value;
+            if(currentLevel != Level)
+            {
+                context.Result = new UnauthorizedResult();
+            }
         }
     }
 }

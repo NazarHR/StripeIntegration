@@ -68,12 +68,13 @@ namespace StripeItegration.Controllers
             var products = await sessionService.ListLineItemsAsync(session.Id);
             var product = products.First();
             var subscriptinoPlan = product.Description.Split(" ")[0];
-            var customerService = new CustomerService();
-            var stripeCustomer = customerService.Get(session.Id);
+            
             user.SubscriptionLevel = subscriptinoPlan;
+
+            user.StripeUserId = session.CustomerId;
             await _userManager.UpdateAsync(user);
             
-            return Created(session.Id, stripeCustomer);
+            return Ok();
 
         }
         [AllowAnonymous]

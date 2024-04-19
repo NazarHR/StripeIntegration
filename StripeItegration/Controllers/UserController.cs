@@ -63,7 +63,11 @@ namespace StripeItegration.Controllers
                 {
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 }
-
+                
+                if(user.SubscriptionLevel != null)
+                {
+                    authClaims.Add(new Claim("SubscriptionLevel", user.SubscriptionLevel));
+                }
                 var token = GetToken(authClaims);
 
                 return Ok(new
