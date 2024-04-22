@@ -23,6 +23,11 @@ namespace StripeItegration.AuthorizeAttributes
             }
             var identity = (ClaimsIdentity)user.Identity;
             var currentLevel = identity.FindFirst("SubscriptionLevel").Value;
+            if(currentLevel == null) 
+            { 
+                context.Result = new UnauthorizedResult();
+                return;
+            }
             if(currentLevel != Level)
             {
                 context.Result = new UnauthorizedResult();
