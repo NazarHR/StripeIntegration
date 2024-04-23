@@ -6,6 +6,7 @@ using static System.Net.WebRequestMethods;
 using Microsoft.AspNetCore.Authorization;
 using StripeItegration.Entities;
 using Microsoft.AspNetCore.Identity;
+using StripeItegration.Models;
 
 namespace StripeItegration.Controllers
 {
@@ -26,20 +27,28 @@ namespace StripeItegration.Controllers
         //4000 0027 6000 3184 - authentication needed
         //4000 0000 0000 0002 - failed
         [HttpPost]
-        public IActionResult Create(string prodict_id)
+        public IActionResult Create(PaymentSessionExternalParametersModel paymentParameters)
         {
-            string domain = string.Format("{0}://{1}",
-                       HttpContext.Request.Scheme, HttpContext.Request.Host);
 
             var priceOptions = new PriceListOptions
             {
-                Product = prodict_id
+                Product = paymentParameters.Product_Id,
             };
             var priceService = new PriceService();
-            StripeList<Price> prices = priceService.List(priceOptions);
+            StripeList<Price> prices;
+            try
+            {
+                prices = priceService.List(priceOptions);
+            }
+            catch(StripeException ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
             
             var options = new SessionCreateOptions
             {
+                //UiMode = "embedded",
                 LineItems = new List<SessionLineItemOptions>
                 {
                   new SessionLineItemOptions
@@ -50,29 +59,28 @@ namespace StripeItegration.Controllers
                 },
                 ClientReferenceId = HttpContext.User.Identity.Name,
                 Mode = "subscription",
-                SuccessUrl = domain + "/success?session_id={CHECKOUT_SESSION_ID}",
-                CancelUrl = Url.Link("Cancel",new { }),
+                SuccessUrl = paymentParameters.SuccessReturnUrl,
             };
             var service = new SessionService();
             Session session = service.Create(options);
             Console.WriteLine(session.ReturnUrl);
-            return Ok(session.Url);
+            return Ok(session.ToJson());
         }
         [AllowAnonymous]
         [HttpGet("/success", Name = "Success")]
-        public async Task<IActionResult> OrderSuccess([FromQuery]string session_id)
+        public async Task<IActionResult> OrderSuccess(/*[FromQuery]string session_id*/)
         {
-            var sessionService = new SessionService();
-            Session session = sessionService.Get(session_id);
-            var user = await _userManager.FindByNameAsync(session.ClientReferenceId);
-            var products = await sessionService.ListLineItemsAsync(session.Id);
-            var product = products.First();
-            var subscriptinoPlan = product.Description.Split(" ")[0];
+            //var sessionService = new SessionService();
+            //Session session = sessionService.Get(session_id);
+            //var user = await _userManager.FindByNameAsync(session.ClientReferenceId);
+            //var products = await sessionService.ListLineItemsAsync(session.Id);
+            //var product = products.First();
+            //var subscriptinoPlan = product.Description.Split(" ")[0];
             
-            user.SubscriptionLevel = subscriptinoPlan;
+            //user.SubscriptionLevel = subscriptinoPlan;
 
-            user.StripeUserId = session.CustomerId;
-            await _userManager.UpdateAsync(user);
+            //user.StripeUserId = session.CustomerId;
+            //await _userManager.UpdateAsync(user);
             
             return Ok();
 

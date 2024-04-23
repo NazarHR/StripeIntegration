@@ -1,5 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Stripe;
+using Stripe.Checkout;
+using StripeItegration.Entities;
+using System.Text.Json;
 
 namespace StripeItegration.Controllers
 {
@@ -8,26 +13,39 @@ namespace StripeItegration.Controllers
     public class WebhookController : Controller
     {
         private readonly string endpointSecret;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
 
-        public WebhookController(IConfiguration configuration)
+        public WebhookController(IConfiguration configuration, UserManager<ApplicationUser> userManager)
         {
             _configuration = configuration;
             endpointSecret = configuration["Stripe:WebHookSecret"];
+            _userManager = userManager;
         }
         [HttpPost]
-        public async Task<IActionResult> EventListenerAsync()
+        public async Task<IActionResult> EventListenerAsync([FromBody]JsonElement stripeEventJson)
         {
-            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             try
             {
-                var stripeEvent = EventUtility.ConstructEvent(json,
+                var stripeEvent = EventUtility.ConstructEvent(stripeEventJson.ToString(),
                     Request.Headers["Stripe-Signature"], endpointSecret);
 
                 // Handle the event
-                if (stripeEvent.Type == Events.CheckoutSessionAsyncPaymentSucceeded)
+                if (stripeEvent.Type == Events.CheckoutSessionCompleted)
                 {
-                    await Console.Out.WriteLineAsync("Succesful checkout");
+                    var sessionService = new SessionService();
+                    var session = (Session)stripeEvent.Data.Object;
+
+                    var user = await _userManager.FindByNameAsync(session.ClientReferenceId);
+                    
+                    var products = await sessionService.ListLineItemsAsync(session.Id);
+                    var product = products.First();
+                    var subscriptinoPlan = product.Description.Split(" ")[0];
+
+                    user.SubscriptionLevel = subscriptinoPlan;
+
+                    user.StripeUserId = session.CustomerId;
+                    await _userManager.UpdateAsync(user);
                 }
                 else
                 {
