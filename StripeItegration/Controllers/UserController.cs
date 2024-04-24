@@ -50,24 +50,8 @@ namespace StripeItegration.Controllers
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                var userRoles = await _userManager.GetRolesAsync(user);
 
-                var authClaims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Sid, user.Id),
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                };
-
-                foreach (var userRole in userRoles)
-                {
-                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-                }
-                
-                if(user.SubscriptionLevel != null)
-                {
-                    authClaims.Add(new Claim("SubscriptionLevel", user.SubscriptionLevel));
-                }
+                var authClaims = await FormClaimsAsync(user);
                 var token = GetToken(authClaims);
 
                 return Ok(new
@@ -79,6 +63,44 @@ namespace StripeItegration.Controllers
             return Unauthorized();
         }
 
+        [Authorize]
+        [HttpGet("/refreshtoken")]
+        public async Task<IActionResult> RefreshTokenAsync()
+        {
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var authClaims = await FormClaimsAsync(user);
+            var token = GetToken(authClaims);
+
+            return Ok(
+                new
+                {
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    expiration = token.ValidTo
+                }
+            );
+        }
+        private async Task<List<Claim>> FormClaimsAsync(ApplicationUser user)
+        {
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            var authClaims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Sid, user.Id),
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                };
+
+            foreach (var userRole in userRoles)
+            {
+                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+            }
+
+            if (user.SubscriptionLevel != null)
+            {
+                authClaims.Add(new Claim("SubscriptionLevel", user.SubscriptionLevel));
+            }
+            return authClaims;
+        }
         private JwtSecurityToken GetToken(List<Claim> authClaims)
         {
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
@@ -114,5 +136,6 @@ namespace StripeItegration.Controllers
                     Description = "User Already Exist"
                 }));
         }
+
     }
 }
