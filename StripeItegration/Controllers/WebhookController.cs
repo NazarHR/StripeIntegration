@@ -52,8 +52,8 @@ namespace StripeItegration.Controllers
                     var subscription = (Subscription)stripeEvent.Data.Object;
                     var subscriptionItemService = new SubscriptionItemService();
                     var item = subscription.Items.Data[0];
-                    var price = item.Price;
-                    var productaName = price.Product.Description;
+                    var service = new ProductService();
+                    var productaName = service.Get(item.Plan.Product.Id).Description;
                     var user = _userManager.Users.First(u => u.StripeUserId == subscription.CustomerId);
                     user.SubscriptionLevel = productaName.Split(" ")[0];
                     await _userManager.UpdateAsync(user);
