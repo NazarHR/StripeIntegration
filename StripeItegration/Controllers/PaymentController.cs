@@ -68,22 +68,9 @@ namespace StripeItegration.Controllers
         }
         [AllowAnonymous]
         [HttpGet("/success", Name = "Success")]
-        public async Task<IActionResult> OrderSuccess(/*[FromQuery]string session_id*/)
-        {
-            //var sessionService = new SessionService();
-            //Session session = sessionService.Get(session_id);
-            //var user = await _userManager.FindByNameAsync(session.ClientReferenceId);
-            //var products = await sessionService.ListLineItemsAsync(session.Id);
-            //var product = products.First();
-            //var subscriptinoPlan = product.Description.Split(" ")[0];
-            
-            //user.SubscriptionLevel = subscriptinoPlan;
-
-            //user.StripeUserId = session.CustomerId;
-            //await _userManager.UpdateAsync(user);
-            
-            return Ok();
-
+        public async Task<IActionResult> OrderSuccess()
+        {            
+            return Ok("Subscription successful");
         }
         [AllowAnonymous]
         [HttpGet("/cancel", Name = "Cancel")]
@@ -91,13 +78,6 @@ namespace StripeItegration.Controllers
         {
             return BadRequest();
         }
-
-        [HttpPatch("/pause/{subscription_item_id}")]
-        public IActionResult PauseSubscription(string subscription_item_id)
-        {
-            throw new NotImplementedException();
-        }
-
         [HttpPatch("/resume/{subscription_item_id}")]
         public IActionResult ResumeSubscription(string subscription_item_id)
         {

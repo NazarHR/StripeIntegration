@@ -37,7 +37,7 @@ namespace StripeItegration.Controllers
                     var session = (Session)stripeEvent.Data.Object;
 
                     var user = await _userManager.FindByNameAsync(session.ClientReferenceId);
-                    
+
                     var products = await sessionService.ListLineItemsAsync(session.Id);
                     var product = products.First();
                     var subscriptinoPlan = product.Description.Split(" ")[0];
@@ -45,6 +45,25 @@ namespace StripeItegration.Controllers
                     user.SubscriptionLevel = subscriptinoPlan;
 
                     user.StripeUserId = session.CustomerId;
+                    await _userManager.UpdateAsync(user);
+                }
+                else if (stripeEvent.Type == Events.CustomerSubscriptionUpdated)
+                {
+                    var subscription = (Subscription)stripeEvent.Data.Object;
+                    var subscriptionItemService = new SubscriptionItemService();
+                    var item = subscription.Items.Data[0];
+                    var price = item.Price;
+                    var productaName = price.Product.Description;
+                    var user = _userManager.Users.First(u => u.StripeUserId == subscription.CustomerId);
+                    user.SubscriptionLevel = productaName.Split(" ")[0];
+                    await _userManager.UpdateAsync(user);
+
+                }
+                else if (stripeEvent.Type == Events.CustomerSubscriptionDeleted)
+                {
+                    var subscription = (Subscription)stripeEvent.Data.Object;
+                    var user = _userManager.Users.First(u => u.StripeUserId == subscription.CustomerId);
+                    user.SubscriptionLevel = "none";
                     await _userManager.UpdateAsync(user);
                 }
                 else

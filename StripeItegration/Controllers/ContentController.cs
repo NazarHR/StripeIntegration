@@ -24,14 +24,14 @@ namespace StripeItegration.Controllers
         [SubscriptionRequried(Level = "Platinum")]
         public IActionResult GetPalinumSubscriptionContetn()
         {
-            return Ok("this contetnt is for members with base subscription");
+            return Ok("this contetnt is for members with paltinum subscription");
         }
 
         [HttpGet("/diamond")]
         [SubscriptionRequried(Level = "Diamond")]
         public IActionResult GetDiamondSubscriptionContetn()
         {
-            return Ok("this contetnt is for members with base subscription");
+            return Ok("this contetnt is for members with diamond subscription");
         }
     }
 }
