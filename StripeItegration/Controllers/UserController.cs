@@ -30,10 +30,10 @@ namespace StripeItegration.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     POST api/authentication/token
+        ///     POST api/auth
         ///     {        
-        ///       "username": "john",
-        ///       "password": "John@123#"   
+        ///       "username": "Admin",
+        ///       "password": "Admin#1"   
         ///     }
         /// Sample Response:
         /// 
@@ -62,7 +62,23 @@ namespace StripeItegration.Controllers
             }
             return Unauthorized();
         }
-
+        /// <summary>
+        /// Refresh authentication
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET api/refreshtoken
+        ///     
+        /// Sample Response:
+        /// 
+        ///     {        
+        ///       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        ///       "expiration": "2022/08/23 12:03:03"   
+        ///     }
+        /// </remarks>
+        /// <response code="200">Authentication Token and Expiration Time</response>
+        /// <response code="401">If you are not logged in</response>  
         [Authorize]
         [HttpGet("/refreshtoken")]
         public async Task<IActionResult> RefreshTokenAsync()
@@ -114,6 +130,26 @@ namespace StripeItegration.Controllers
                 );
             return token;
         }
+        /// <summary>
+        /// Get an authentication token to use for calling the endpoints
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST api/register
+        ///     {        
+        ///       "username": "Admin",
+        ///       "password": "Admin#1",
+        ///       "email": "Admin@Admin.com"
+        ///     }
+        /// Sample Response:
+        /// 
+        ///     {        
+        ///        "userId": "bec7b7d9-3f54-4e79-9833-cf95efe32fa2"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Internal User Id</response>
+        /// <response code="400">Detailed error message</response>  
         [HttpPost("/register", Name = "Register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel registerModel)
         {
@@ -126,7 +162,11 @@ namespace StripeItegration.Controllers
                 var result = await _userManager.CreateAsync(user, registerModel.Password);
                 if(result.Succeeded)
                 {
-                    return Ok();
+                    return Ok(
+                        new
+                        {
+                            userId = user.Id
+                        });
                 }
                 return BadRequest(result.Errors);
             }
@@ -136,6 +176,5 @@ namespace StripeItegration.Controllers
                     Description = "User Already Exist"
                 }));
         }
-
     }
 }

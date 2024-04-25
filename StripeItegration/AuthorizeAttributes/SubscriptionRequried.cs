@@ -33,7 +33,7 @@ namespace StripeItegration.AuthorizeAttributes
             var expectedLevel = Enum.Parse<SubscriptionLevel>(Level);
             if(currentLevel < expectedLevel)
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new ForbidResult();
             }
         }
     }

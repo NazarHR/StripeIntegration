@@ -15,13 +15,23 @@ namespace StripeItegration.Controllers
         private readonly string endpointSecret;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
-
+        
         public WebhookController(IConfiguration configuration, UserManager<ApplicationUser> userManager)
         {
             _configuration = configuration;
             endpointSecret = configuration["Stripe:WebHookSecret"];
             _userManager = userManager;
         }
+        /// <summary>
+        /// Webhook for stripe events
+        /// </summary>
+        /// <remarks>
+        ///     Currently supports:
+        ///     
+        ///         -CheckoutSessionCompleted
+        ///         -CustomerSubscriptionUpdated
+        ///         -CustomerSubscriptionDeleted
+        /// </remarks>
         [HttpPost]
         public async Task<IActionResult> EventListenerAsync([FromBody]JsonElement stripeEventJson)
         {
@@ -66,10 +76,10 @@ namespace StripeItegration.Controllers
                     user.SubscriptionLevel = "none";
                     await _userManager.UpdateAsync(user);
                 }
-                else
-                {
-                    Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
-                }
+                //else
+                //{
+                //    Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
+                //}
 
                 return Ok();
             }

@@ -55,6 +55,14 @@ namespace StripeItegration
                         new string[]{}
                     }
                 });
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "Stripe-integrated API",
+                    Description = "An ASP.NET Core Web API integrated with Stripe",
+                });
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
+                options.IncludeXmlComments(xmlPath);
             });
 
             StripeConfiguration.ApiKey = configuration["Stripe:Key"];
