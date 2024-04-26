@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StripeItegration", "StripeItegration.csproj", "{5FDAB67E-5B33-4A5E-85B8-ED09A432A978}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StripeIntegration.Test", "..\StripeIntegration.Test\StripeIntegration.Test.csproj", "{30195EA2-9DB6-4B1B-8061-3DF988D0670A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{5FDAB67E-5B33-4A5E-85B8-ED09A432A978}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FDAB67E-5B33-4A5E-85B8-ED09A432A978}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FDAB67E-5B33-4A5E-85B8-ED09A432A978}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30195EA2-9DB6-4B1B-8061-3DF988D0670A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30195EA2-9DB6-4B1B-8061-3DF988D0670A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30195EA2-9DB6-4B1B-8061-3DF988D0670A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30195EA2-9DB6-4B1B-8061-3DF988D0670A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
